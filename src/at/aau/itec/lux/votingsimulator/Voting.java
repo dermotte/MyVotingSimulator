@@ -7,7 +7,7 @@ import java.util.HashMap;
 public class Voting {
 
     private static final int numberOfVoters = 257;
-    private static final double zipfExponent = 1;
+    protected static final double zipfExponent = 1;
     private static int numberOfVotes = 12;
     private static final double runs = 5000;
 
