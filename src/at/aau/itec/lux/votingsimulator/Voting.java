@@ -7,19 +7,20 @@ import java.util.HashMap;
 public class Voting {
 
     private static final int numberOfVoters = 257;
-    private static final double zipfExponent = 2;
+    private static final double zipfExponent = 1;
     private static int numberOfVotes = 12;
-    private static final double runs = 1000;
+    private static final double runs = 5000;
 
     public static void main(String[] args) {
         System.out.printf("Zipf exponent: %2.1f, averaging in %d runs: Difference in popularity vs. party bound voting\n", zipfExponent, (int) runs);
-        System.out.println("number of votes\tSpearmans distance\toverlap in first 6 ranks");
+        System.out.println("number of votes\tSpearmans distance\toverlap in first 6 ranks\toverlap in first 12 ranks");
         for (int myTries = 1; myTries <=12; myTries+=1) {
 
             numberOfVotes = myTries;
             // and now vote ...
             double distSum =0d;
-            double intersectSum =0d;
+            double intersect06Sum =0d;
+            double intersect12Sum =0d;
             for (int v = 0; v< runs; v++) {
                 // create 18 candidates:
                 ArrayList<Candidate> candidates = new ArrayList<>(18);
@@ -66,11 +67,26 @@ public class Voting {
         61	25	None
          */
                 ArrayList<Agent> voters = new ArrayList<>();
-                for (int i = 0; i<38; i++) voters.add(new Agent(Party.Inter));
-                for (int i = 0; i<97; i++) voters.add(new Agent(Party.Cult));
-                for (int i = 0; i<50; i++) voters.add(new Agent(Party.Hack));
-                for (int i = 0; i<47; i++) voters.add(new Agent(Party.Econ));
-                for (int i = 0; i<25; i++) voters.add(new Agent(Party.None));
+                if (false) { // pre-determined number of voters
+                    for (int i = 0; i < 38; i++) voters.add(new Agent(Party.Inter));
+                    for (int i = 0; i < 97; i++) voters.add(new Agent(Party.Cult));
+                    for (int i = 0; i < 50; i++) voters.add(new Agent(Party.Hack));
+                    for (int i = 0; i < 47; i++) voters.add(new Agent(Party.Econ));
+                    for (int i = 0; i < 25; i++) voters.add(new Agent(Party.None));
+                } else { // random number of voters with 20 minimum and registered maximum
+                    int randomNumber = 0;
+                    randomNumber = 20 + (int) Math.ceil(Math.random()*71);
+                    for (int i = 0; i < randomNumber; i++) voters.add(new Agent(Party.Inter));
+                    randomNumber = 20 + (int) Math.ceil(Math.random()*213);
+                    for (int i = 0; i < randomNumber; i++) voters.add(new Agent(Party.Cult));
+                    randomNumber = 20 + (int) Math.ceil(Math.random()*100);
+                    for (int i = 0; i < randomNumber; i++) voters.add(new Agent(Party.Hack));
+                    randomNumber = 20 + (int) Math.ceil(Math.random()*93);
+                    for (int i = 0; i < randomNumber; i++) voters.add(new Agent(Party.Econ));
+                    randomNumber = 20 + (int) Math.ceil(Math.random()*41);
+                    for (int i = 0; i < randomNumber; i++) voters.add(new Agent(Party.None));
+                }
+
                 for (Agent a : voters) {
                     voteStrategy(a, candidates);
                 }
@@ -104,18 +120,26 @@ public class Voting {
                 }
 
                 // jaccard bzw. schnittmenge:
-                double intersect = 0;
+                double intersect06 = 0;
                 for (int i = 0; i < 6; i++) {
                     Candidate c = pop.get(i);
                     int j = strategy.indexOf(c);
-                    if (j<6) intersect++;
+                    if (j<6) intersect06++;
+                }
+
+                double intersect12 = 0;
+                for (int i = 0; i < 12; i++) {
+                    Candidate c = pop.get(i);
+                    int j = strategy.indexOf(c);
+                    if (j<12) intersect12++;
                 }
 
     //            System.out.println("dist = " + dist);
                 distSum += dist;
-                intersectSum += intersect;
+                intersect06Sum += intersect06;
+                intersect12Sum += intersect12;
             }
-            System.out.printf("%d\t%6.2f\t%6.2f\n", numberOfVotes, distSum/ runs, intersectSum/ runs);
+            System.out.printf("%d\t%6.2f\t%6.2f\t%6.2f\n", numberOfVotes, distSum/ runs, intersect06Sum/ runs, intersect12Sum/ runs);
         }
     }
 
@@ -151,8 +175,8 @@ public class Voting {
                     }
                 }
                 if (draw.isEmpty()) break;
-                Collections.shuffle(draw);
-                Candidate d = draw.remove(0);
+//                Collections.shuffle(draw);
+                Candidate d = draw.remove((int) Math.floor(Math.random()*draw.size()));
                 d.addVote();
                 temp.remove(d);
             }
@@ -173,14 +197,15 @@ public class Voting {
         temp.addAll(candidates);
 
         for (int k = 0; k < numberOfVotes; k++) {
+            draw.clear();
             for (Candidate c: temp) {
                 for (int i =0; i< c.popularity;i++) {
                     draw.add(c);
                 }
             }
 
-            Collections.shuffle(draw);
-            Candidate d = draw.remove(0);
+//            Collections.shuffle(draw);
+            Candidate d = draw.remove((int) Math.floor(Math.random()*draw.size()));
             d.addVote();
             temp.remove(d);
         }
