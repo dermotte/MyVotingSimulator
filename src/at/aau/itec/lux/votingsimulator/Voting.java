@@ -7,7 +7,7 @@ import java.util.HashMap;
 public class Voting {
 
     private static final int numberOfVoters = 257;
-    protected static final double zipfExponent = 1;
+    protected static final double zipfExponent = 2;
     private static int numberOfVotes = 12;
     private static final double runs = 5000;
 
@@ -211,6 +211,13 @@ public class Voting {
         }
     }
 
+    /**
+     *
+     * @param k rank to be determined
+     * @param s exponent
+     * @param n number of discrete samples.
+     * @return
+     */
     public static double zipf(int  k, double s, int n) {
         double t1 = 1d/Math.pow(k, s);
         double t2 = 0d;
